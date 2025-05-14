@@ -1,0 +1,167 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SkillDoze QA Admin</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100">
+    <div class="container mx-auto p-4 max-w-4xl">
+        <h1 class="text-3xl font-bold text-center mb-6">SkillDoze QA Admin</h1>
+        <p class="text-center text-gray-600 mb-8">
+            Train the QA Bot and Test Responses
+            <br>
+            <a href="/" class="text-blue-500 hover:underline">Go to Student Interface</a>
+        </p>
+
+        <!-- File Upload -->
+        <div class="bg-white p-6 rounded-lg shadow-md mb-8">
+            <h2 class="text-2xl font-semibold mb-4">Upload Training Files</h2>
+            <input id="fileInput" type="file" accept=".pdf,.txt" class="w-full p-2 border rounded mb-4">
+            <button onclick="handleUpload()" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 w-full">Upload File</button>
+        </div>
+
+        <!-- QA Input -->
+        <div class="bg-white p-6 rounded-lg shadow-md mb-8">
+            <h2 class="text-2xl font-semibold mb-4">Test the Bot</h2>
+            <input id="qaQuery" type="text" placeholder="e.g., Check code J45.909 or Explain RCM process" class="w-full p-2 border rounded mb-4" onkeypress="if(event.key === 'Enter') handleSubmit()">
+            <button onclick="handleSubmit()" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 w-full">Submit Question</button>
+        </div>
+
+        <!-- Chat Output -->
+        <div class="bg-white p-6 rounded-lg shadow-md">
+            <h2 class="text-2xl font-semibold mb-4">Responses</h2>
+            <div id="chatOutput" class="h-64 overflow-y-auto border p-4 bg-gray-50"></div>
+        </div>
+    </div>
+
+    <script>
+        async function handleUpload() {
+            const fileInput = document.getElementById('fileInput');
+            const file = fileInput.files[0];
+
+            if (!file) {
+                alert("Please select a file to upload.");
+                return;
+            }
+
+            if (!file.name.endsWith('.pdf') && !file.name.endsWith('.txt')) {
+                alert("Only PDF and TXT files are allowed.");
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('file', file);
+
+            try {
+                const response = await fetch('/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+
+                const data = await response.json();
+                if (data.error) {
+                    throw new Error(data.error);
+                }
+
+                alert("File uploaded successfully! The bot's knowledge base has been updated.");
+                fileInput.value = ''; // Clear the file input
+            } catch (error) {
+                console.error('Error:', error);
+                alert(`Error uploading file: ${error.message}`);
+            }
+        }
+
+        async function handleSubmit() {
+            const outputDiv = document.getElementById('chatOutput');
+            const query = document.getElementById('qaQuery').value;
+
+            if (!query.trim()) {
+                alert("Please enter a question.");
+                return;
+            }
+
+            const userMessage = document.createElement('div');
+            userMessage.className = 'text-right mb-2';
+            userMessage.innerHTML = `<div class="message-bubble bg-blue-100">${query}</div>`;
+            outputDiv.appendChild(userMessage);
+
+            const formData = new FormData();
+            formData.append('query', query);
+
+            try {
+                const response = await fetch('/ask', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+
+                const data = await response.json();
+                if (data.error) {
+                    throw new Error(data.error);
+                }
+
+                const aiMessage = document.createElement('div');
+                aiMessage.className = 'text-left mb-2';
+                aiMessage.innerHTML = `<div class="message-bubble bg-white text-gray-900">${data.answer}</div>`;
+                outputDiv.appendChild(aiMessage);
+
+                document.getElementById('qaQuery').value = '';
+            } catch (error) {
+                console.error('Error:', error);
+                const errorMessage = document.createElement('div');
+                errorMessage.className = 'text-left mb-2';
+                errorMessage.innerHTML = `<div class="message-bubble bg-red-100">AI: Sorry, there was an error processing your request. Please try again. Error: ${error.message}</div>`;
+                outputDiv.appendChild(errorMessage);
+            }
+
+            outputDiv.scrollTop = outputDiv.scrollHeight;
+        }
+    </script>
+
+    <style>
+        #chatOutput {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+        #chatOutput > div {
+            word-wrap: break-word;
+            line-height: 1.6;
+        }
+        .text-right {
+            align-self: flex-end;
+        }
+        .text-left {
+            align-self: flex-start;
+        }
+        .message-bubble {
+            display: inline-block;
+            max-width: 70%;
+            padding: 1rem;
+            border-radius: 1rem;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            border: 1px solid #e5e7eb;
+            white-space: pre-wrap;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+        .message-bubble ul, .message-bubble ol {
+            margin-left: 1.5rem;
+            margin-top: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+        .message-bubble li {
+            margin-bottom: 0.5rem;
+        }
+    </style>
+</body>
+</html>

@@ -1,0 +1,18 @@
+Medical Coding Basics:
+- Medical coding involves translating healthcare diagnoses, procedures, and services into standardized codes.
+- Common coding systems include:
+  - ICD-10: Used for diagnoses (e.g., J45.909 for "Unspecified asthma, uncomplicated").
+  - CPT: Used for procedures (e.g., 99213 for a standard office visit).
+  - HCPCS: Used for supplies and services (e.g., E0110 for crutches).
+- Accuracy is critical to ensure proper billing and reimbursement.
+
+Revenue Cycle Management (RCM):
+- RCM is the financial process of managing claims, payments, and revenue in healthcare.
+- Key steps in RCM:
+  - Patient registration and insurance verification.
+  - Charge capture and coding.
+  - Claim submission to payers.
+  - Payment posting and denial management.
+  - Patient billing for remaining balances.
+- Effective RCM reduces claim denials and improves cash flow.
+| Out-File -FilePath knowledge_base.txt -Encoding UTF8
